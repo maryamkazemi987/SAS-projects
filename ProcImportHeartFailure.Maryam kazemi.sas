@@ -1,0 +1,223 @@
+PROC IMPORT OUT= MARYAM.Heart_Failure_Dateset1 
+            DATAFILE= "E:\Data science course\course 4.  fundamentals of
+ SAS programming\heart_failure_clinical_records_dataset1.csv" 
+            DBMS=CSV REPLACE;
+     GETNAMES=YES;
+     DATAROW=2; 
+RUN;
+*Brwsing Data portion;
+proc print data=MARYAM.Heart_Failure_Dateset1;run;
+proc print;run;
+*Brwsing decriptor portion;
+proc contents;run;
+PROC CONTENTS ORDER=varnum;
+RUN;
+PROC SORT DATA=MARYAM.Heart_Failure_Dateset1 OUT=MARYAM.Heart_Failure_Dateset1_no_dupkey NODUPKEY;
+ BY _ALL_;
+RUN; 
+title " Describe Numeric variables"; 
+Proc means data=MARYAM.Heart_Failure_Dateset1 n NMISS MIN MEAN STD CV MAX Q1 MEDIAN Q3;
+var age creatinine_phosphokinase platelets serum_creatinine serum_sodium time ;
+Run;
+TITLE;
+proc means data=MARYAM.Heart_Failure_Dateset n mean min max Q1 Q3 range median clm alpha=0.05 std  maxdec=2;
+ 
+   var age creatinine_phosphokinase platelets serum_creatinine serum_sodium time;
+ 
+   title 'Summary of Presentation and Taste Scores';
+run;
+TITLE;
+title "Demonstrating PROC UNIVARIATE";
+proc univariate data=MARYAM.Heart_Failure_Dateset;
+var age creatinine_phosphokinase platelets serum_creatinine serum_sodium time;
+histogram;
+probplot / normal(mu=est sigma=est);
+run;
+DATA MARYAM.Heart_Failure_Dateset1;
+SET MARYAM.Heart_Failure_Dateset;
+LOGcreatinine_phosphokinase=log10(creatinine_phosphokinase);
+RUN;
+proc print;run;
+
+proc univariate data=MARYAM.Heart_Failure_Dateset22;
+var LOGcreatinine_phosphokinase ;
+histogram;
+probplot / normal(mu=est sigma=est);
+run	;
+
+DATA MARYAM.Heart_Failure_Dateset1;
+SET MARYAM.Heart_Failure_Dateset;
+LOGserum_creatinine=log10(serum_creatinine);
+RUN;
+proc print;run;
+proc univariate data=MARYAM.Heart_Failure_Dateset1;
+var LOGserum_creatinine ;
+histogram;
+probplot / normal(mu=est sigma=est);
+run;
+
+/* Checking Relationship between two variables by using scatter plot */
+ods graphics / reset width=6.4in height=4.8in imagemap;
+proc sgplot data=MARYAM.Heart_Failure_Dateset1;
+	scatter x='age'n y='time'n /;
+	xaxis grid;
+	yaxis grid;
+run;
+ods graphics / reset;
+
+title "Creating a Scatter Plot Using PROC GPLOT";
+symbol value=dot;
+proc gplot data=MARYAM.Heart_Failure_Dateset1;
+plot  age*time ;
+run;
+quit;
+proc gplot data=MARYAM.Heart_Failure_Dateset1;
+plot  serum_sodium*LOGcreatinine_phosphokinase ;
+run;
+quit;
+ods graphics on;
+title "Computing Pearson Correlation Coefficients";
+proc corr data=MARYAM.Heart_Failure_Dateset1 nosimple rank;
+var ;
+
+run;
+ods graphics off;
+goptions reset=all;
+title "Creating a Scatter Plot Using PROC GPLOT";
+title2 "Adding DEATH_EVENT Information to the Plot";
+symbol1 color=black value=dot;
+symbol2 color=black value=square;
+proc gplot data=MARYAM.Heart_Failure_Dateset1;
+plot age*time =DEATH_EVENT ;
+run;
+quit;
+ods graphics / reset;
+goptions reset=all;
+title "Creating a Scatter Plot Using PROC GPLOT";
+title2 "Adding DEATH_EVENT Information to the Plot";
+symbol1 color=black value=dot;
+symbol2 color=black value=square;
+proc gplot data=MARYAM.Heart_Failure_Dateset1;
+plot platelets*serum_creatinine =DEATH_EVENT ;
+run;
+quit;
+ods graphics / reset;
+
+goptions reset=all;
+title "Creating a Scatter Plot Using PROC GPLOT";
+title2 "Adding Anemia Information to the Plot";
+symbol1 color=black value=dot;
+symbol2 color=black value=square;
+proc gplot data=MARYAM.Heart_Failure_Dateset;
+plot age*LOGcreatinine_phosphokinase =anaemia ;
+run;
+quit;
+/* Correaltion among numeric variables */
+PROC CORR DATA= MARYAM.Heart_Failure_Dateset22 PLOTS=SCATTER(NVAR=all);
+   VAR age ejection_fraction platelets serum_sodium time LOGserum_creatinine LOGcreatinine_phosphokinase;
+RUN;
+title "Computing Frequencies and Percentages Using PROC FREQ";
+PROC FREQ DATA=MARYAM.Heart_Failure_Dateset22 ;
+TABLE anaemia diabetes high_blood_pressure sex smoking DEATH_EVENT/nocum;
+RUN;
+goptions reset=all;
+pattern value = solid color = blue;
+title "Generating a Bar Chart - Using PROC GCHART";
+proc gchart data=MARYAM.Heart_Failure_Dateset22;
+vbar anaemia diabetes high_blood_pressure sex smoking DEATH_EVENT ;
+run;
+quit;
+Creating a Cross-Tabulation Table Using PROC FREQ
+title "Demonstrating a Cross-Tabulation Table using PROC FREQ";
+proc freq data=MARYAM.Heart_Failure_Dateset22;
+tables anaemia * DEATH_EVENT;
+run;
+proc freq data=MARYAM.Heart_Failure_Dateset22;
+tables  diabetes* DEATH_EVENT;
+run;
+proc freq data=MARYAM.Heart_Failure_Dateset22;
+tables  high_blood_pressure* DEATH_EVENT;
+run;
+
+proc freq data=MARYAM.Heart_Failure_Dateset22;
+tables  smoking* DEATH_EVENT;
+run;
+title "Creating a Scatter Plot Using PROC GPLOT";
+symbol value=dot;
+proc gplot data=MARYAM.Heart_Failure_Dateset22;
+plot  platelets*serum_sodium ;
+run;
+quit;
+
+title "Creating a Scatter Plot Using PROC GPLOT";
+symbol value=dot;
+proc gplot data=MARYAM.Heart_Failure_Dateset22;
+plot  platelets*LOGserum_creatinine ;
+run;
+quit;
+
+title "Using PROC SGPLOT to Produce a Scatter Plot";
+title2 "Adding DEATH_EVENT Information to the Plot";
+proc sgplot data=MARYAM.Heart_Failure_Dateset22;
+scatter x=time y=age / group=DEATH_EVENT;
+run;
+quit;
+TITle;
+TITLE 2;
+title "Using PROC SGPLOT to Produce a Scatter Plot";
+title2 "Adding sex Information to the Plot";
+proc sgplot data=MARYAM.Heart_Failure_Dateset22;
+scatter x=serum_sodium y=platelets / group=sex;
+run;
+quit;
+TITle;
+TITLE 2;
+
+title "Comparing ejection_fraction to age,platelets,serum_sodium, time, LOGserum_creatinine and LOGcreatinine_phosphokinase";
+proc sgscatter data=MARYAM.Heart_Failure_Dateset22;
+compare y=ejection_fraction x=(age platelets serum_sodium time LOGserum_creatinine LOGcreatinine_phosphokinase);
+run;
+TITle;
+title "Switching Axes and Adding a GROUP= Option";
+proc sgscatter data=MARYAM.Heart_Failure_Dateset22;
+compare x=ejection_fraction
+y=(age platelets serum_sodium time LOGserum_creatinine LOGcreatinine_phosphokinase) /
+group=DEATH_EVENT;
+run;
+TITle;
+ods graphics on;
+title "Computing Pearson Correlation Coefficients";
+proc corr data= MARYAM.Heart_Failure_Dateset22 nosimple rank;
+var age platelets serum_sodium time LOGserum_creatinine LOGcreatinine_phosphokinase;
+with ejection_fraction;
+run;
+title "Computing Spearman Rank Correlations";
+proc corr data=MARYAM.Heart_Failure_Dateset22 nosimple spearman;
+var age platelets serum_sodium time LOGserum_creatinine LOGcreatinine_phosphokinase;
+with ejection_fraction;
+run;
+title "Comparing Proportions";
+proc freq data=MARYAM.Heart_Failure_Dateset22;
+tables diabetes * DEATH_EVENT / chisq;
+run;
+title "Conducting a Two-Sample T-test";
+proc ttest data=MARYAM.Heart_Failure_Dateset22;
+class DEATH_EVENT;
+var age platelets serum_sodium time LOGserum_creatinine LOGcreatinine_phosphokinase;
+run;
+
+ods graphics on;
+title "Conducting a Two-Sample T-test";
+proc ttest data=MARYAM.Heart_Failure_Dateset22;
+class DEATH_EVENT;
+var age platelets serum_sodium time LOGserum_creatinine LOGcreatinine_phosphokinase ;
+run;
+ods graphics off;
+title "Generating a Bar Chart - Using PROC SGPLOT";
+proc sgplot data=MARYAM.Heart_Failure_Dateset22;
+vbar anaemia diabetes high_blood_pressure sex smoking DEATH_EVENT ;
+run;
+title "Generating a Bar Chart - Using PROC SGPLOT";
+proc sgplot data=MARYAM.Heart_Failure_Dateset22;
+vbar anaemia diabetes high_blood_pressure sex smoking DEATH_EVENT ;
+run;
